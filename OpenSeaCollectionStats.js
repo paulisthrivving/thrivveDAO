@@ -1,32 +1,68 @@
 // Debug function
 // function runner() {
-//   Logger.log("Trying to get the data from open sea for 'tribe'");
-//   Logger.log(getFloorPriceCollection('tribe-odyssey'))
+//   Logger.log("Trying to get the data from OpenSea for 'cryptodickbutts-s3'");
+//   Logger.log(getOSTotalSupplyCollection('cryptodickbutts-s3'))
+//   Logger.log(refreshOSCache('cryptodickbutts-s3'));
 // }
 
+const BASE_URL = "https://api.opensea.io/api/v1/collection/";
+
+// this function hits the API endpoint and puts a fresh copy of the data into the cache, and returns the JSON string
+function refreshOSCache(collection_slug) {
+  // create the cache object
+  var cache = CacheService.getScriptCache();
+
+  // Otherwise...make a call to the OpenSea API
+    var url = `${BASE_URL}${collection_slug}/stats`;
+  Logger.log("Hitting URL:" + url);
+  
+  // hit the URL of the API endpoint
+  var result = UrlFetchApp.fetch(url, { muteHttpExceptions: true }); // rate limited, so we don't want to keep loading it
+  var resCode = result.getResponseCode();
+  var resReturn;
+
+  // based on the response code, do some stuff...
+  switch(resCode) {
+    case 200: // all good
+    case 1015: // transfer limited
+      // the api has returned something useful, save it..
+      cache.put(collection_slug, result.getContentText(), 1500); // stale after 25 minutes
+      Logger.log('Cache refreshed');
+      resReturn = result.getContentText();
+      break;
+    case 429:
+      // too many requests...
+      Logger.log('Too Many Requests');   
+      resReturn = null;
+      break;
+    default:
+      Logger.log('Something else - ' + result.getContentText());   
+      resReturn = null;
+      break;
+  }  
+
+    // return it
+    return resReturn; 
+}
+
 // This function rewrites the collection stats from OpenSea if expired or missing, otherwise return the JSON string tha makes it up
-function getCollectionStats(collection_slug) {
+function getOSCollectionStats(collection_slug) {
   var cache = CacheService.getScriptCache();
   var cached = cache.get(collection_slug);
   if (cached != null) {
+    Logger.log("We have data in the cache for the collection slug - returing...");
     return cached;
-  }
-
-  // Otherwise...make a call to the OpenSea API
-    var url = "https://api.opensea.io/api/v1/collection/" + collection_slug + "/stats";
-
-  var result = UrlFetchApp.fetch(url); // rate limited, so we don't want to keep loading it
-  var contents = result.getContentText();
-
-  // put the JSON string in the cache
-  cache.put(collection_slug, contents, 1500); // stale after 25 minutes
-  return contents;
+  } else {
+      // there is no cache for fx rate, go get it
+      Logger.log('Reloading data into the cache, its expired...'); 
+      return refreshOSCache(collection_slug);
+    } 
 }
 
 // abstraction to return any data you want from the cache based on field name
-function getOpenSeaDataFromCache(collection_slug, field_name) {
+function getOSDataFromCache(collection_slug, field_name) {
   // Get the data from the cache
-  contents = getCollectionStats(collection_slug);
+  contents = getOSCollectionStats(collection_slug);
 
   // Load it into a JSON object
   openSeaCache = JSON.parse(contents); 
@@ -41,8 +77,8 @@ function getOpenSeaDataFromCache(collection_slug, field_name) {
  * @return the floor price of the collection on OpenSea
  * @customfunction
  */
-function getFloorPriceCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'floor_price');
+function getOSFloorPriceCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'floor_price');
 }
 /** 
 * Return the 1 day volume from the collection on OpenSea
@@ -50,8 +86,8 @@ function getFloorPriceCollection(collection_slug) {
  * @return the one-day volume (in Eth) of the collection on OpenSea
  * @customfunction
  */
-function get1DayVolumeCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'one_day_volume');
+function getOS1DayVolumeCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'one_day_volume');
 }
 
 /**
@@ -60,8 +96,8 @@ function get1DayVolumeCollection(collection_slug) {
  * @return the average price in Eth of the collection on OpenSea
  * @customfunction
  */
-function getAveragePriceCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'average_price');
+function getOSAveragePriceCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'average_price');
 }
 
 /**
@@ -70,8 +106,8 @@ function getAveragePriceCollection(collection_slug) {
  * @return the total available number of items in the collection on OpenSea
  * @customfunction
  */
-function getTotalSupplyCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'total_supply');
+function getOSTotalSupplyCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'total_supply');
 }
 
 /**
@@ -80,8 +116,8 @@ function getTotalSupplyCollection(collection_slug) {
  * @return the total available number of items in the collection on OpenSea
  * @customfunction
  */
-function getNumberOwnersCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'num_owners');
+function getOSNumberOwnersCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'num_owners');
 }
 
 /**
@@ -90,8 +126,8 @@ function getNumberOwnersCollection(collection_slug) {
  * @return the the 1-day sales value (in Eth) of the collection on OpenSea
  * @customfunction
  */
-function get1DaySalesCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'one_day_sales');
+function getOS1DaySalesCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'one_day_sales');
 }
 
 /**
@@ -100,8 +136,8 @@ function get1DaySalesCollection(collection_slug) {
  * @return the the 1-day average price (in Eth) of the collection on OpenSea
  * @customfunction
  */
-function get1DayAvgPriceCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'one_day_average_price');
+function getOS1DayAvgPriceCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'one_day_average_price');
 }
 
 /**
@@ -110,8 +146,8 @@ function get1DayAvgPriceCollection(collection_slug) {
  * @return the the 7-day volume (in Eth) of the collection on OpenSea
  * @customfunction
  */
-function get7DayVolumeCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'seven_day_volume');
+function getOS7DayVolumeCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'seven_day_volume');
 }
 
 /**
@@ -120,8 +156,8 @@ function get7DayVolumeCollection(collection_slug) {
  * @return the the 7-day change in the collection on OpenSea
  * @customfunction
  */
-function get7DayChangeCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'seven_day_change');
+function getOS7DayChangeCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'seven_day_change');
 }
 
 /**
@@ -130,8 +166,8 @@ function get7DayChangeCollection(collection_slug) {
  * @return the the 7-day change of the collection on OpenSea
  * @customfunction
  */
-function get7DaySalesCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'seven_day_sales');
+function getOS7DaySalesCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'seven_day_sales');
 }
 
 /**
@@ -140,8 +176,8 @@ function get7DaySalesCollection(collection_slug) {
  * @return the 7 day average price (in Eth) for the collection on OpenSea
  * @customfunction
  */
-function get7DayAvgPriceCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'seven_day_average_price');
+function getOS7DayAvgPriceCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'seven_day_average_price');
 }
 
 /**
@@ -150,8 +186,8 @@ function get7DayAvgPriceCollection(collection_slug) {
  * @return the 30 day volume (in Eth) of the collection on OpenSea
  * @customfunction
  */
-function get30DayVolumeCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'thirty_day_volume');
+function getOS30DayVolumeCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'thirty_day_volume');
 }
 
 /**
@@ -160,8 +196,8 @@ function get30DayVolumeCollection(collection_slug) {
  * @return the 30 day change for the collection on OpenSea
  * @customfunction
  */
-function get30DayChangeCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'thirty_day_change');
+function getOS30DayChangeCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'thirty_day_change');
 }
 
 /**
@@ -170,8 +206,8 @@ function get30DayChangeCollection(collection_slug) {
  * @return the 30 day sales (in Eth) for the collection on OpenSea
  * @customfunction
  */
-function get30DaySalesCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'thirty_day_sales');
+function getOS30DaySalesCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'thirty_day_sales');
 }
 
 /**
@@ -180,8 +216,8 @@ function get30DaySalesCollection(collection_slug) {
  * @return the 30 day average price (in Eth) for the collection on OpenSea
  * @customfunction
  */
-function get30DayAvgPriceCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'thirty_day_average_price');
+function getOS30DayAvgPriceCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'thirty_day_average_price');
 }
 
 /**
@@ -190,8 +226,8 @@ function get30DayAvgPriceCollection(collection_slug) {
  * @return the total volume (in Eth) for the collection on OpenSea
  * @customfunction
  */
-function getTotalVolumeCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'total_volume');
+function getOSTotalVolumeCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'total_volume');
 }
 
 /**
@@ -200,8 +236,8 @@ function getTotalVolumeCollection(collection_slug) {
  * @return the total sales (in Eth) for the collection on OpenSea
  * @customfunction
  */
-function getTotalSalesCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'total_sales');
+function getOSTotalSalesCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'total_sales');
 }
 
 /**
@@ -210,6 +246,6 @@ function getTotalSalesCollection(collection_slug) {
  * @return the market cap (in Eth) for the collection on OpenSea
  * @customfunction
  */
-function getMarketCapCollection(collection_slug) {
-  return getOpenSeaDataFromCache(collection_slug, 'market_cap');
+function getOSMarketCapCollection(collection_slug) {
+  return getOSDataFromCache(collection_slug, 'market_cap');
 }
