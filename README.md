@@ -1,6 +1,6 @@
 # thrivveDAO
 
-For now, a collection of free scripts to help you get data you might need to gather data and make informed decisions from common platforms in Web3
+For now, a collection of free scripts to plug into Google Sheets (Apps Scripts) to help you pull data for informed decision making with respect to NFT collections from commom Web3 platform API end points:
 
 ## OpenSea
 1. Return collection stats from the OpenSea API (without an API key) - makes use of CacheService as the end-point is rate-limited
