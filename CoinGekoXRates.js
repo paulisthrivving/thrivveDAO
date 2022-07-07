@@ -76,7 +76,7 @@ function getRateFromCache(from, to) {
   } else {
     // lets not pretend there is a rate...
     Logger.log("Error returned from the cache");
-    return '#NA';
+    return 0;
   }
 }
 
