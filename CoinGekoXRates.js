@@ -1,11 +1,13 @@
 // debug function
 // function runnerXRates() {
-//   Logger.log("Outputting the Eth/Pound x-rate");
+//   Logger.log('Refresh cache first of all');
+//   refreshCGCache();
+//   Logger.log('Outputting the Eth/Pound x-rate');
 //   Logger.log(getExchangeRateEthVsPound());
-//   Logger.log(refreshCGCache());
-// }  
+//   // Logger.log(refreshCGCache());
+// }   
 
-const BASE_URL_RATES = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cmatic-network&vs_currencies=usd%2Cgbp";
+const BASE_URL_RATES = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cmatic-network%2Csolana&vs_currencies=usd%2Cgbp";
 
 // this function hits the API endpoint and puts a fresh copy of the data into the cache, and returns the JSON string
 function refreshCGCache() {
@@ -28,7 +30,7 @@ function refreshCGCache() {
       resReturn = result.getContentText();
       break;
     case 429:
-      // too many requests - no data returned...
+      // too many requests - no data returned...a
       Logger.log('Too Many Requests');   
       resReturn = null;
       break;
@@ -112,4 +114,22 @@ function getExchangeRateMaticVsPound() {
  */
 function getExchangeRateMaticVsDollar() {
   return getRateFromCache('matic-network', 'usd');
+}
+
+/** 
+ * Return the Solana against the USD exchange rate
+ * @return the rate of Solana vs US Dollars
+ * @customfunction
+ */
+ function getExchangeRateSolanaVsDollar() {
+  return getRateFromCache('solana', 'usd');
+}
+
+/** 
+ * Return the Solana against the GBP exchange rate
+ * @return the rate of Solana vs US Dollars
+ * @customfunction
+ */
+function getExchangeRateSolanaVsPound() {
+  return getRateFromCache('solana', 'gbp');
 }
