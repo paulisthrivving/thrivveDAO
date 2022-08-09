@@ -15,6 +15,6 @@ We are building a set of tools to support our operations. This repo is where we 
 
 ## X-Rates
 ###### CoinGecko
-- Return exchange rates for Eth, Matic and Sol vs USD and GBP using the public [CoinGecko API](https://www.coingecko.com/en/api) - can easily be extended to support other currencies and tokens by changing the base URL[^1].
+- Return exchange rates for Eth, Matic, SCRT, and Sol vs USD and GBP using the public [CoinGecko API](https://www.coingecko.com/en/api) - can easily be extended to support other currencies and tokens by changing the base URL[^1].
 
 [^1]: All calls make use of Google's CacheService as the end-point is rate-limited.
