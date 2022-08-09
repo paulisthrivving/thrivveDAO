@@ -4,10 +4,12 @@
 //   refreshCGCache();
 //   Logger.log('Outputting the Eth/Pound x-rate');
 //   Logger.log(getExchangeRateEthVsPound());
+//   Logger.log('Outputting the Scrt/Dollar x-rate');
+//   Logger.log(getExchangeRateScrtVsDollar());
 //   // Logger.log(refreshCGCache());
 // }   
 
-const BASE_URL_RATES = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cmatic-network%2Csolana&vs_currencies=usd%2Cgbp";
+const BASE_URL_RATES = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum%2Cmatic-network%2Csolana%2Csecret&vs_currencies=usd%2Cgbp";
 
 // this function hits the API endpoint and puts a fresh copy of the data into the cache, and returns the JSON string
 function refreshCGCache() {
@@ -96,6 +98,24 @@ function getExchangeRateEthVsDollar() {
  */
 function getExchangeRateEthVsPound() {
   return getRateFromCache('ethereum', 'gbp');
+}
+
+/** 
+ * Return the scrt against the USD exchange rate
+ * @return the rate of scrt vs US Dollars
+ * @customfunction
+ */
+function getExchangeRateScrtVsDollar() {
+  return getRateFromCache('secret', 'usd');
+}
+
+/** 
+ * Return the scrt against the GBP exchange rate
+ * @return the rate of scrt vs GBP
+ * @customfunction
+ */
+function getExchangeRateScrtVsPound() {
+  return getRateFromCache('secret', 'gbp');
 }
 
 /** 
